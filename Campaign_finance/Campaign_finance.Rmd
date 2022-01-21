@@ -1,0 +1,187 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+## Loading in libraries
+library(dplyr)
+library(tidyverse)
+library(stringr)
+library(ggplot2)
+```
+Loading in contribution data from multiple campaigns for the 2022 annual filing period:
+```{r}
+## Kelly Schulz, R
+schulz_data <- read_csv("Schulz_ContributionsList.csv")
+## Tom Perez, D
+perez_data <- read_csv("Perez_ContributionsList.csv")
+## Peter Franchot, D
+franchot_data <- read_csv("Franchot_ContributionsList.csv")
+## Wes Moore, D
+moore_data <- read_csv("Moore_ContributionsList.csv")
+## John King, D
+king_data <- read_csv("King_ContributionsList.csv")
+## Rushern Baker, D
+baker_data <- read_csv("Baker_ContributionsList.csv")
+## Doug Gansler, D
+gansler_data <- read_csv("Gansler_ContributionsList.csv")
+```
+I want to join all of these dataframes together to make for less redundancy in the exploration. Before that, I am going to mutate the Receiving Committee column to make it easier to organize which campaign each donation is for.
+```{r}
+#Schulz
+schulz_data <- schulz_data %>%
+  mutate(`Receiving Committee` = "Schulz")
+#Perez
+perez_data <- perez_data %>%
+  mutate(`Receiving Committee` = "Perez")
+#Franchot
+franchot_data <- franchot_data %>%
+  mutate(`Receiving Committee` = "Franchot")
+#Moore
+moore_data <- moore_data %>%
+  mutate(`Receiving Committee` = "Moore")
+#King
+king_data <- king_data %>%
+  mutate(`Receiving Committee` = "King")
+#Baker
+baker_data <- baker_data %>%
+  mutate(`Receiving Committee` = "Baker")
+#Gansler
+gansler_data <- gansler_data %>%
+  mutate(`Receiving Committee` = "Gansler")
+```
+Now I want to join all of these dataframes together.
+```{r}
+master_data <- bind_rows(schulz_data, perez_data, franchot_data, moore_data, king_data, baker_data, gansler_data)
+```
+The dataframes are kind of messy. One of the first things I want to do is make a state column and populate it with the state from which the contribution came from. 
+```{r}
+master_data_new <- master_data %>%
+  mutate(state = case_when(
+    str_detect(`Contributor Address`, "MD") ~ "Maryland",
+    str_detect(`Contributor Address`, "Md") ~ "Maryland",
+    str_detect(`Contributor Address`, "FL") ~ "Florida",
+    str_detect(`Contributor Address`, "MI") ~ "Michigan",
+    str_detect(`Contributor Address`, "VA") ~ "Virginia",
+    str_detect(`Contributor Address`, "DC") ~ "Washington, D.C.",
+    str_detect(`Contributor Address`, "WI") ~ "Wisconsin",
+    str_detect(`Contributor Address`, "WV") ~ "West Virginia",
+    str_detect(`Contributor Address`, "NC") ~ "North Carolina",
+    str_detect(`Contributor Address`, "PA") ~ "Pennsylvania",
+    str_detect(`Contributor Address`, "TX") ~ "Texas",
+    str_detect(`Contributor Address`, "IL") ~ "Illinois",
+    str_detect(`Contributor Address`, "CO") ~ "Colorado",
+    str_detect(`Contributor Address`, "GA") ~ "Georgia",
+    str_detect(`Contributor Address`, "SC") ~ "South Carolina",
+    str_detect(`Contributor Address`, "ME") ~ "Maine",
+    str_detect(`Contributor Address`, "MO") ~ "Missouri",
+    str_detect(`Contributor Address`, "AZ") ~ "Arizona",
+    str_detect(`Contributor Address`, "NJ") ~ "New Jersey",
+    str_detect(`Contributor Address`, "CA") ~ "California",
+    str_detect(`Contributor Address`, "AR") ~ "Arkansas",
+    str_detect(`Contributor Address`, "MA") ~ "Massachusetts",
+    str_detect(`Contributor Address`, "NY") ~ "New York",
+    str_detect(`Contributor Address`, "CT") ~ "Connecticut",
+    str_detect(`Contributor Address`, "WA") ~ "Washington",
+    str_detect(`Contributor Address`, "OR") ~ "Oregon",
+    str_detect(`Contributor Address`, "MA") ~ "Massachusetts",
+    str_detect(`Contributor Address`, "HI") ~ "Hawaii",
+    str_detect(`Contributor Address`, "PR") ~ "Puerto Rico",
+    str_detect(`Contributor Address`, "MN") ~ "Minnesota",
+    str_detect(`Contributor Address`, "NH") ~ "New Hampshire",
+    str_detect(`Contributor Address`, "AK") ~ "Alaska",
+    str_detect(`Contributor Address`, "OH") ~ "Ohion",
+    str_detect(`Contributor Address`, "TN") ~ "Tennessee",
+    str_detect(`Contributor Address`, "NV") ~ "Nevada",
+    str_detect(`Contributor Address`, "RI") ~ "Rhode Island",
+    str_detect(`Contributor Address`, "IN") ~ "Indiana",
+    str_detect(`Contributor Address`, "KS") ~ "Kansaa",
+    str_detect(`Contributor Address`, "MS") ~ "Mississippi",
+    str_detect(`Contributor Address`, "IA") ~ "Iowa",
+    str_detect(`Contributor Address`, "AL") ~ "Alabama",
+    str_detect(`Contributor Address`, "MT") ~ "Montana",
+    str_detect(`Contributor Address`, "WY") ~ "Wyoming",
+    str_detect(`Contributor Address`, "UT") ~ "Utah",
+    str_detect(`Contributor Address`, "NM") ~ "New Mexico",
+    str_detect(`Contributor Address`, "KY") ~ "Kentucky",
+    str_detect(`Contributor Address`, "SD") ~ "South Dakota",
+    str_detect(`Contributor Address`, "ND") ~ "North Dakota",
+    str_detect(`Contributor Address`, "OK") ~ "MOklahoma",
+    str_detect(`Contributor Address`, "VT") ~ "Vermont",
+    str_detect(`Contributor Address`, "ID") ~ "Idaho",
+    str_detect(`Contributor Address`, "LA") ~ "Louisiana",
+    str_detect(`Contributor Address`, "DE") ~ "Delaware",
+    str_detect(`Contributor Address`, "VI") ~ "Virgin Islands",
+    str_detect(`Contributor Address`, "NE") ~ "Nebraska",
+    str_detect(`Contributor Address`, "AS") ~ "American Somoa"
+  ))
+```
+I also want to drop all entries in the dataframe that are either from out of the country or do not have a state listed. I'll do that here.
+```{r}
+master_data_new <- master_data_new %>%
+  drop_na(state)
+```
+Now that that is done, another thing I wanted to do was standardize the date column so that I can use that column for exploration.
+```{r}
+master_data_new <- master_data_new %>%
+  mutate(date = as.Date(`Contribution Date`, format = "%m/%d/%Y"))
+```
+Now I can do some surface level exploration: what is the average amount of donation for each campaign? Which had the most donations from out of state? Who raised the most in the first half of 2021? The last half? In 2022 so far? 
+```{r}
+## who lead the way in total fundraising
+master_data_new %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(sum(`Contribution Amount`))
+## average donation for each campaign
+master_data_new %>%
+  group_by(`Receiving Committee`) %>%
+  summarise_at(vars(`Contribution Amount`), list(name = mean))
+
+## Franchot has the highest average donation amount at just over $900. Baker has the lowest, at $112. Could this be skewed by large donations from corporations? I am going to filter to just individual contributions to see if the trend is the same.
+master_data_new %>%
+  filter(`Contributor Type` == "Individual") %>%
+  group_by(`Receiving Committee`) %>%
+  summarise_at(vars(`Contribution Amount`), list(name = mean))
+
+## Franchot still leads the way, at $774 dollars on average. Baker is still at the bottom, with $175. 
+
+## What about where candidates were getting money? Who was collecting a lot of donations from out of state?
+
+## To figure this out, it is going to be helpful to add a column to the dataframe that simply indicates if a contribution came from inside of Maryland or from a different state
+
+master_data_new <- master_data_new %>%
+  mutate(in_state = case_when(
+    str_detect(state, "Maryland") ~ "True",
+    TRUE ~ "False"
+  ))
+
+## Now I can check
+master_data_new %>%
+  group_by(`Receiving Committee`, in_state) %>%
+  count()
+## I cans see just from glancing at the numbers that Franchot is collection a lot of donations from inside the state, while candidates like Moore, King and Perez are financed heavily by out-of-state donations. I want to find the % of donations that came from out of state for each campaign.
+in_state <- master_data_new %>%
+  filter(in_state == "True") %>%
+  group_by(`Receiving Committee`) %>%
+  count() 
+total <- master_data_new %>%
+  group_by(`Receiving Committee`) %>%
+  count()
+in_state_percentage <- total %>%
+  left_join(in_state, b=c("Receiving Committee")) %>%
+  mutate(in_state_perc = (n.y/n.x)*100)
+
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
