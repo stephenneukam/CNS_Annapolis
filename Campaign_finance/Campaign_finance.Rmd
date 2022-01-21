@@ -164,7 +164,8 @@ master_data_new <- master_data_new %>%
 master_data_new %>%
   group_by(`Receiving Committee`, in_state) %>%
   count()
-## I cans see just from glancing at the numbers that Franchot is collection a lot of donations from inside the state, while candidates like Moore, King and Perez are financed heavily by out-of-state donations. I want to find the % of donations that came from out of state for each campaign.
+
+## I can see just from glancing at the numbers that Franchot is collection a lot of donations from inside the state, while candidates like Moore, King and Perez are financed heavily by out-of-state donations. I want to find the % of donations that came from out of state for each campaign.
 in_state <- master_data_new %>%
   filter(in_state == "True") %>%
   group_by(`Receiving Committee`) %>%
@@ -176,6 +177,93 @@ in_state_percentage <- total %>%
   left_join(in_state, b=c("Receiving Committee")) %>%
   mutate(in_state_perc = (n.y/n.x)*100)
 
+## Schulz pulled in the highest % of her donations from in Maryland, with almost 96%. Franchot led the Democratic side, with almost 85%. Baker was close behind. Moore, King and Perez receieved a good amount of out-of-state donations. 
+
+## But what about % of total money raised? How much of that came from out of state for each candidate?
+in_state_money <- master_data_new %>%
+  filter(in_state == "True") %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(y = sum(`Contribution Amount`))
+
+total_money <- master_data_new %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(x = sum(`Contribution Amount`))
+
+in_state_money_perc <- in_state_money %>%
+  left_join(total_money, b=c("Receiving Committee") )%>%
+  mutate(in_state_perc = (y/x)*100)
+
+## The dynamics change a little bit — Schulz still has over 90% of her money coming from in-state, but Franchot drops to 78% and Baker down to 82%. Moore is at 42% and King sits at just 11%.
+
+## For some of the more notable campagins that are receiving a lot of out-of-state money — Moore, King, Perez — where is it coming from? What states pop up the most?
+master_data_new %>%
+  filter(`Receiving Committee` == "Perez" | `Receiving Committee` == "Moore" | `Receiving Committee` == "King") %>%
+  group_by(`Receiving Committee`, state) %>%
+  count() %>%
+  arrange(desc(n))
+
+## King and Moore both received a lot of donations from New York and California. Perez had a lot of contributions from California as well. A map that shows these numbers might be interesting.
+
+## The reports also designate who was donating — an individual, a company/organization, a PAC Committe. I want to see how that breaks down for each candidate.
+master_data_new %>%
+  group_by(`Receiving Committee`, `Contributor Type`) %>%
+  count() %>%
+  arrange(desc(n))
+
+## A couple quick observations: Franchot pulled in the most contributions from both Businesses/organizations as well as PACs. Schulz also pulled in a lot of contributions from businesses. Moore had by far the most contributions from individuals. I am going to explore some of these a bit more specifically. 
+
+## Franchot: how much money did he make from PACs?
+master_data_new %>%
+  filter(`Receiving Committee` == "Franchot" & `Contributor Type` == "PAC Committee")  %>%
+  summarise(total = sum(`Contribution Amount`))
+  
+master_data_new %>%
+  filter(`Contributor Type` == "PAC Committee")  %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(total = sum(`Contribution Amount`))
+
+## only four candidates received money from PACs, and Perez leads the way in money with $20k. Schulz pulled in $11.5k and Franchot had $9k.
+
+## Who made the most from businesses?
+master_data_new %>%
+  filter(`Contributor Type` == "Business/Group/Organization")  %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(total = sum(`Contribution Amount`)) %>%
+  arrange(desc(total))
+
+## Franchot made the most from businesses/groups/organizations, with just under $465k. Schulz made $427k.
+
+master_data_new %>%
+  filter(`Contributor Type` == "Business/Group/Organization") %>%
+  group_by(`Receiving Committee`) %>%
+  summarise_at(vars(`Contribution Amount`), list(name = mean)) %>%
+  arrange(desc(name))
+
+## I am also curious how the timeline of fundraising happened. Did someone come on strong at the end of the year? Has someone started lagging? 
+
+master_data_new %>%
+  filter(date <= as.Date("2021-07-31")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(total = sum(`Contribution Amount`)) %>%
+  arrange(desc(total))
+
+## Before the end of July, Moore had raised $1.5 million. King had raised $1 million. Schulz hauled in $620k. Franchot had made just under $328k. 
+
+master_data_new %>%
+  filter(date >= as.Date("2021-08-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(total = sum(`Contribution Amount`)) %>%
+  arrange(desc(total))
+
+## After July, Moore raised the most again, with $2.57 million. Perez really stepped up the fundraising, making $1.86 million. Franchot also made up the large gap, making $1.3 million. 
+
+master_data_new %>%
+  filter(date >= as.Date("2022-01-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(total = sum(`Contribution Amount`)) %>%
+  arrange(desc(total))
+
+## Since the start of 2022, Perez has made the most, with $490k. Moore has made $452k and Franchot has hauled in $352k. 
 ```
 
 
