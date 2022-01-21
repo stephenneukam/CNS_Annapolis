@@ -13,6 +13,7 @@ library(dplyr)
 library(tidyverse)
 library(stringr)
 library(ggplot2)
+library(tidycensus)
 ```
 Loading in contribution data from multiple campaigns for the 2022 annual filing period:
 ```{r}
@@ -264,7 +265,37 @@ master_data_new %>%
   arrange(desc(total))
 
 ## Since the start of 2022, Perez has made the most, with $490k. Moore has made $452k and Franchot has hauled in $352k. 
-```
+
+## What zip codes in Maryland donated the most money? 
+
+zips <- master_data_new %>%
+  filter(state == "Maryland") %>%
+  mutate(zip = str_extract(`Contributor Address`, "MD \\d{5}"))
+
+zips <- zips %>%
+  mutate(zip = str_remove(zip, "MD "))
+
+moore_zips <- zips %>%
+  filter(`Receiving Committee` == "Moore")
+
+md_zips_totals <- zips %>%
+  group_by(zip) %>%
+  summarise(total = sum(`Contribution Amount`)) %>%
+  arrange(desc(total))
+
+md_zips <- get_acs(geography = "zcta",
+                  variables = c(population = "B01001_001"),
+                  state = "MD")
+
+md_zips <- md_zips %>%
+  select(GEOID, estimate)
+
+md_zips_joined <- md_zips_totals %>%
+  left_join(md_zips, by=c("zip"="GEOID")) %>%
+  mutate(per_100k = (total/estimate)*100000) %>%
+  arrange(desc(per_100k)) %>%
+  slice(-1,-2, -3)
+``` 
 I want to write a couple of CSVs to export and use for data visualization for a quick story memo for my editors. I am going to write them here.
 ```{r}
 # Where is Perez getting his money?
@@ -458,6 +489,9 @@ average_dono <- master_data_new %>%
   summarise_at(vars(`Contribution Amount`), list(average = mean))
 
 write_csv(average_dono, "data_viz/average_dono.csv")
+
+## csv for zip code info
+write_csv(md_zips_joined, "data_viz/md_zips_joined.csv")
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
