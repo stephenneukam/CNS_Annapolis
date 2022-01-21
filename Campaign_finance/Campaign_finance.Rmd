@@ -265,7 +265,200 @@ master_data_new %>%
 
 ## Since the start of 2022, Perez has made the most, with $490k. Moore has made $452k and Franchot has hauled in $352k. 
 ```
+I want to write a couple of CSVs to export and use for data visualization for a quick story memo for my editors. I am going to write them here.
+```{r}
+# Where is Perez getting his money?
+perez_state_money <- master_data_new %>%
+  filter(`Receiving Committee` == "Perez") %>%
+  group_by(state) %>%
+  summarise(total_amount = sum(`Contribution Amount`))
 
+perez_state <- master_data_new %>%
+  filter(`Receiving Committee` == "Perez") %>%
+  group_by(state) %>%
+  count()
+
+perez_state_joined <- perez_state %>%
+  left_join(perez_state_money, b=c("state"))
+
+# Where is Moore getting his money?
+moore_state_money <- master_data_new %>%
+  filter(`Receiving Committee` == "Moore") %>%
+  group_by(state) %>%
+  summarise(total_amount = sum(`Contribution Amount`))
+
+moore_state <- master_data_new %>%
+  filter(`Receiving Committee` == "Moore") %>%
+  group_by(state) %>%
+  count()
+
+moore_state_joined <- moore_state %>%
+  left_join(moore_state_money, b=c("state"))
+  
+# Where is Franchot getting his money?
+franchot_state_money <- master_data_new %>%
+  filter(`Receiving Committee` == "Franchot") %>%
+  group_by(state) %>%
+  summarise(total_amount = sum(`Contribution Amount`))
+
+franchot_state <- master_data_new %>%
+  filter(`Receiving Committee` == "Franchot") %>%
+  group_by(state) %>%
+  count()
+
+franchot_state_joined <- franchot_state %>%
+  left_join(franchot_state_money, b=c("state"))
+
+# Where is Schulz getting her money?
+schulz_state_money <- master_data_new %>%
+  filter(`Receiving Committee` == "Schulz") %>%
+  group_by(state) %>%
+  summarise(total_amount = sum(`Contribution Amount`))
+
+schulz_state <- master_data_new %>%
+  filter(`Receiving Committee` == "Schulz") %>%
+  group_by(state) %>%
+  count()
+
+schulz_state_joined <- schulz_state %>%
+  left_join(schulz_state_money, b=c("state"))
+
+## Where is King getting his money?
+king_state_money <- master_data_new %>%
+  filter(`Receiving Committee` == "King") %>%
+  group_by(state) %>%
+  summarise(total_amount = sum(`Contribution Amount`))
+
+king_state <- master_data_new %>%
+  filter(`Receiving Committee` == "King") %>%
+  group_by(state) %>%
+  count()
+
+king_state_joined <- king_state %>%
+  left_join(king_state_money, b=c("state"))
+
+## writing the fils
+write_csv(perez_state_joined, "data_viz/perez_states.csv")
+write_csv(moore_state_joined, "data_viz/moore_states.csv")
+write_csv(franchot_state_joined, "data_viz/franchot_states.csv")
+write_csv(schulz_state_joined, "data_viz/schulz_states.csv")
+write_csv(king_state_joined, "data_viz/king_states.csv")
+
+## date analysis
+over_time <- master_data_new %>%
+  group_by(`Receiving Committee`, date) %>%
+  summarise(total = sum(`Contribution Amount`))
+
+Jan.21 <- over_time %>%
+  filter(date <= as.Date("2021-01-30")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Jan.2021 = sum(total))
+
+Feb.21 <- over_time %>%
+  filter(date < as.Date("2021-03-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Feb.2021 = sum(total))
+
+Mar.21 <- over_time %>%
+  filter(date < as.Date("2021-04-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Mar.2021 = sum(total))
+
+Apr.21 <- over_time %>%
+  filter(date < as.Date("2021-05-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Apr.2021 = sum(total))
+
+May.21 <- over_time %>%
+  filter(date < as.Date("2021-06-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(May.2021 = sum(total))
+
+Jun.21 <- over_time %>%
+  filter(date < as.Date("2021-07-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Jun.2021 = sum(total))
+
+Jul.21 <- over_time %>%
+  filter(date < as.Date("2021-08-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Jul.2021 = sum(total))
+
+Aug.21 <- over_time %>%
+  filter(date < as.Date("2021-09-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Aug.2021 = sum(total))
+
+Sep.21 <- over_time %>%
+  filter(date < as.Date("2021-10-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Sep.2021 = sum(total))
+
+Oct.21 <- over_time %>%
+  filter(date < as.Date("2021-11-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Oct.2021 = sum(total))
+
+Nov.21 <- over_time %>%
+  filter(date < as.Date("2021-12-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Nov.2021 = sum(total))
+
+Dec.21 <- over_time %>%
+  filter(date < as.Date("2022-01-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Dec.2021 = sum(total))
+
+Jan.22 <- over_time %>%
+  filter(date > as.Date("2021-01-01")) %>%
+  group_by(`Receiving Committee`) %>%
+  summarise(Jan.2022 = sum(total))
+
+all_time <- Dec.21 %>%
+  left_join(Jan.22, by=c("Receiving Committee"))
+
+all_time <- all_time %>%
+  left_join(Nov.21, by=c("Receiving Committee"))
+
+all_time <- all_time %>%
+  left_join(Oct.21, by=c("Receiving Committee"))
+
+all_time <- all_time %>%
+  left_join(Sep.21, by=c("Receiving Committee"))
+
+all_time <- all_time %>%
+  left_join(Aug.21, by=c("Receiving Committee"))
+
+all_time <- all_time %>%
+  left_join(Jul.21, by=c("Receiving Committee"))
+
+all_time <- all_time %>%
+  left_join(Jun.21, by=c("Receiving Committee"))
+
+all_time <- all_time %>%
+  left_join(May.21, by=c("Receiving Committee"))
+
+all_time <- all_time %>%
+  left_join(Apr.21, by=c("Receiving Committee"))
+
+all_time <- all_time %>%
+  left_join(Mar.21, by=c("Receiving Committee"))
+
+all_time <- all_time %>%
+  left_join(Feb.21, by=c("Receiving Committee"))
+
+all_time <- all_time %>%
+  left_join(Jan.21, by=c("Receiving Committee"))
+
+write_csv(all_time, "data_viz/all_time.csv")
+
+## average donation
+average_dono <- master_data_new %>%
+  group_by(`Receiving Committee`) %>%
+  summarise_at(vars(`Contribution Amount`), list(average = mean))
+
+write_csv(average_dono, "data_viz/average_dono.csv")
+```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 
