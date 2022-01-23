@@ -121,8 +121,11 @@ master_data_new <- master_data %>%
     str_detect(`Contributor Address`, "NE") ~ "Nebraska",
     str_detect(`Contributor Address`, "AS") ~ "American Somoa"
   ))
+
+master_data_new %>%
+  filter(is.na(state))
 ```
-I also want to drop all entries in the dataframe that are either from out of the country or do not have a state listed. I'll do that here.
+I also want to drop all entries in the dataframe that are either from out of the country or do not have a state listed. I'll do that here. This removes 16 entries from the dataset. 
 ```{r}
 master_data_new <- master_data_new %>%
   drop_na(state)

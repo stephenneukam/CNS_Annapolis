@@ -14,7 +14,7 @@ Idaho,6,400
 Illinois,68,28497.35
 Indiana,16,12755.22
 Iowa,6,28.5
-Kansas,13,1651.45
+Kansaa,13,1651.45
 Kentucky,5,8525
 Louisiana,3,29.5
 Maine,7,6765.82
@@ -24,7 +24,7 @@ Michigan,32,22369.81
 Minnesota,69,56736
 Mississippi,11,2810
 Missouri,8,5044.5
-Oklahoma,4,22.5
+MOklahoma,4,22.5
 Montana,1,500
 Nebraska,2,105
 Nevada,8,15276.5
@@ -48,7 +48,7 @@ Vermont,5,2728
 Virgin Islands,3,175
 Virginia,131,123178.74
 Washington,65,45341
-District of Columbia,306,250580.46
+"Washington, D.C.",306,250580.46
 West Virginia,5,305
 Wisconsin,67,48489.51
 Wyoming,1,1000
