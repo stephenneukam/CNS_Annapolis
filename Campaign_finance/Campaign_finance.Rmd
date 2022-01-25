@@ -31,7 +31,7 @@ king_data <- read_csv("King_ContributionsList.csv")
 baker_data <- read_csv("Baker_ContributionsList.csv")
 ## Doug Gansler, D
 gansler_data <- read_csv("Gansler_ContributionsList.csv")
-## Larry Hogan, R, 2014-2015
+## Larry Hogan, R, 2014-2021
 hogan_data <- read_csv("Hogan_ContributionsList.csv")
 ```
 I want to join all of these dataframes together to make for less redundancy in the exploration. Before that, I am going to mutate the Receiving Committee column to make it easier to organize which campaign each donation is for.
@@ -301,41 +301,56 @@ md_zips_joined <- md_zips_totals %>%
   arrange(desc(per_100k)) %>%
   slice(-1,-2, -3)
 
-## I am also curious how much crossover there is between Hogan and Schulz donors. I'm going to join those two datasets to see the crossover.
+## I am also curious how much crossover there is between Hogan and Schulz donors. I'm going to join those two datasets to see the crossover. Some of them will appear as duplicates, so I want to find distinct donor names to narrow down who contributed to both campaigns, and then I can join that with the Schulz campaign data to see the crossover.
 
-hogan_schulz_joined <- hogan_data %>%
-  inner_join(schulz_data, by=c("Contributor Name"))
+hogan_distinct <- 
+  hogan_data %>%
+  select(`Contributor Name`, `Contributor Address`) %>%
+  distinct() %>%
+  mutate(zip = str_extract(`Contributor Address`, "\\d{5}"))
+  
 
-## some of these results are duplicated because people that donated to Schulz once also donated to Hogan more than once, and vice versa. I want to make it so that I only see unique donations to Schulz to calculate the amount of money.
-hogan_schulz_joined <- hogan_schulz_joined %>%
+schulz_distinct <- 
+  schulz_data %>%
+  select(`Contributor Name`, `Contributor Address`) %>%
+  distinct() %>%
+  mutate(zip = str_extract(`Contributor Address`, "\\d{5}"))
+
+hogan_schulz_joined_distinct <- schulz_distinct %>%
+  inner_join(hogan_distinct, by=c("Contributor Name", "zip")) %>%
+  select(`Contributor Name`) %>%
   distinct()
+
+hogan_schulz_joined <- hogan_schulz_joined_distinct %>%
+  inner_join(schulz_data, b=c("Contributor Name"))
 
 hogan_schulz_joined %>%
   group_by(`Contributor Name`) %>%
   count()
 
-## There were 863 people or entities that contributed to Hogan's campaigns between 2015 and 2021 that also contributed to Schulz' campaign. 
+## There were 715 people or entities that contributed to Hogan's campaigns between 2015 and 2021 that also contributed to Schulz' campaign. 
 
 hogan_schulz_joined %>%
-  summarise(total = sum(`Contribution Amount.y`))
+  summarise(total = sum(`Contribution Amount`))
 
-## This amounted to $1.22 million for the Schulz campaign. 
+## This amounted to $461.4k for the Schulz campaign. 
 
 schulz_data %>%
   group_by(`Contributor Name`) %>%
   count()
 
-863/1910
+715/1910
 
 schulz_data %>%
   summarise(total = sum(`Contribution Amount`))
 
-1220299/1522000
+## That was 37.4% of the contributors to Schulz' campaign. 
 
-1220299/3404
+461410.5	/1522000
 
-## That is just over 45% of all contributors to her campaign. It is shockingly 80% of the money she received in total.
-``` 
+## It was 30.3% of the money she raised.
+
+```
 I want to write a couple of CSVs to export and use for data visualization for a quick story memo for my editors. I am going to write them here.
 ```{r}
 # Where is Perez getting his money?
