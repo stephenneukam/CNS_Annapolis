@@ -301,18 +301,8 @@ md_zips_joined <- md_zips_totals %>%
   arrange(desc(per_100k)) %>%
   slice(-1,-2, -3)
 
-## I am also curious how much crossover there is between Hogan and Schulz donors. I am going to filter the Hogan dataset for his 2018 annual data, which was the final fundraising push before his run for a second term in that year. Annoyingly, there is an extra space between "2018" and "Annual" in the set, so I am going to fix that first.
-hogan_data <- hogan_data %>%
-  mutate(`Filing Period` = case_when(`Filing Period` == "2018  Annual" ~ "2018 Annual",
-                                     TRUE ~ `Filing Period`))
-hogan_data <- hogan_data %>%
-  filter(`Filing Period` == "2018 Annual")
+## I am also curious how much crossover there is between Hogan and Schulz donors. I'm going to join those two datasets to see the crossover.
 
-## Just curious, how much did Hogan raise that year?
-hogan_data %>%
-  summarise(total = sum(`Contribution Amount`)) ##almost $5.5 million
-
-## Now I want to join the Hogan and Schulz datasets to see how many overlapping donors there are
 hogan_schulz_joined <- hogan_data %>%
   inner_join(schulz_data, by=c("Contributor Name"))
 
@@ -324,20 +314,27 @@ hogan_schulz_joined %>%
   group_by(`Contributor Name`) %>%
   count()
 
-## There were 377 people or entities that contributed to Hogan's 2018 campaign that also contributed to Schulz' campaign. 
+## There were 863 people or entities that contributed to Hogan's campaigns between 2015 and 2021 that also contributed to Schulz' campaign. 
 
 hogan_schulz_joined %>%
   summarise(total = sum(`Contribution Amount.y`))
 
-## This amounted to $261k for the Schulz campaign. 
+## This amounted to $1.22 million for the Schulz campaign. 
 
 schulz_data %>%
   group_by(`Contributor Name`) %>%
   count()
 
-377/1910
+863/1910
 
-## That is just under 20% of all contributors to her campaign. 
+schulz_data %>%
+  summarise(total = sum(`Contribution Amount`))
+
+1220299/1522000
+
+1220299/3404
+
+## That is just over 45% of all contributors to her campaign. It is shockingly 80% of the money she received in total.
 ``` 
 I want to write a couple of CSVs to export and use for data visualization for a quick story memo for my editors. I am going to write them here.
 ```{r}
