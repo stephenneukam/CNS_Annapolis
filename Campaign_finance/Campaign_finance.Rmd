@@ -350,6 +350,41 @@ schulz_data %>%
 
 ## It was 30.3% of the money she raised.
 
+## I want to see how much crossover there is between Hogan donors and Franchot donors
+
+franchot_distinct <- franchot_data %>%
+  select(`Contributor Name`, `Contributor Address`) %>%
+  distinct() %>%
+  mutate(zip = str_extract(`Contributor Address`, "\\d{5}"))
+
+hogan_franchot_joined_distinct <- franchot_distinct %>%
+  inner_join(hogan_distinct, by=c("Contributor Name", "zip")) %>%
+  select(`Contributor Name`) %>%
+  distinct()
+
+hogan_franchot_joined <- hogan_franchot_joined_distinct %>%
+  inner_join(franchot_data, b=c("Contributor Name"))
+
+hogan_franchot_joined %>%
+  group_by(`Contributor Name`) %>%
+  count()
+
+franchot_data %>%
+  group_by(`Contributor Name`) %>%
+  count()
+
+107/1439
+
+## there were 107 donors who contributed to Franchot that also contributed to Hogan between 2015 and 2021. That was just 7% of Franchot's donors.
+
+hogan_franchot_joined %>%
+  summarise(total = sum(`Contribution Amount`))
+
+franchot_data %>%
+  summarise(total = sum(`Contribution Amount`))
+
+## Franchot made $161k from those donors.
+161145/1663516
 ```
 I want to write a couple of CSVs to export and use for data visualization for a quick story memo for my editors. I am going to write them here.
 ```{r}
