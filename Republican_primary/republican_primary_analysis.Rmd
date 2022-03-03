@@ -1,0 +1,14 @@
+---
+title: "republican_primary_analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+## loading libraries
+library(tidyverse)
+library(tidycensus)
+library(janitor)
+
+## loading in data
+
+```
