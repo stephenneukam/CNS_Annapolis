@@ -110,9 +110,15 @@ schulz_data %>%
 ## Schulz raised $87,337 from Trump donors, which is just .05738305 of Schulz's money
 
 ## joining Cox/Trump donors with Hogan donors to see the crossover
-Cox_Hogan_unique <- Cox_Trump_Unique %>%
-  inner_join(Hogan_unique, by=c("contributor_name"="Contributor Name"))
+Cox_Hogan_unique <- Cox_unique %>%
+  inner_join(Hogan_unique, by=c("Contributor Name"))
+
+Cox_Hogan_unique <- Cox_Hogan_unique %>%
+  select(`Contributor Name`) %>%
+  unique()
 
 Cox_Hogan_joined <- cox_data %>%
-  inner_join(Cox_Hogan_unique, by=c("Contributor Name"="contributor_name"))
+  inner_join(Cox_Hogan_unique, by=c("Contributor Name"))
+
+25754.48/397167.3 ##.06484542 of Cox's money
 ```
