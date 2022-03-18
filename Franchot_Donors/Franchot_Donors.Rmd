@@ -1,0 +1,80 @@
+---
+title: "Franchot_Donors"
+output: html_document
+date: '2022-03-17'
+---
+
+```{r}
+## loading libraries
+library(tidyverse)
+library(janitor)
+```
+```{r}
+## loading in Franchot donor data
+Franchot_donors <- read.csv("Franchot_ContributionsList.csv")
+
+Franchot_donors <- Franchot_donors %>%
+  mutate(`Receiving Committee` = "Franchot")
+
+Franchot_donors <- Franchot_donors %>%
+  mutate(state = case_when(
+    str_detect(Contributor.Address, "MD") ~ "Maryland",
+    str_detect(Contributor.Address, "Md") ~ "Maryland",
+    str_detect(Contributor.Address, "FL") ~ "Florida",
+    str_detect(Contributor.Address, "MI") ~ "Michigan",
+    str_detect(Contributor.Address, "VA") ~ "Virginia",
+    str_detect(Contributor.Address, "DC") ~ "Washington, D.C.",
+    str_detect(Contributor.Address, "WI") ~ "Wisconsin",
+    str_detect(Contributor.Address, "WV") ~ "West Virginia",
+    str_detect(Contributor.Address, "NC") ~ "North Carolina",
+    str_detect(Contributor.Address, "PA") ~ "Pennsylvania",
+    str_detect(Contributor.Address, "TX") ~ "Texas",
+    str_detect(Contributor.Address, "IL") ~ "Illinois",
+    str_detect(Contributor.Address, "CO") ~ "Colorado",
+    str_detect(Contributor.Address, "GA") ~ "Georgia",
+    str_detect(Contributor.Address, "SC") ~ "South Carolina",
+    str_detect(Contributor.Address, "ME") ~ "Maine",
+    str_detect(Contributor.Address, "MO") ~ "Missouri",
+    str_detect(Contributor.Address, "AZ") ~ "Arizona",
+    str_detect(Contributor.Address, "NJ") ~ "New Jersey",
+    str_detect(Contributor.Address, "CA") ~ "California",
+    str_detect(Contributor.Address, "AR") ~ "Arkansas",
+    str_detect(Contributor.Address, "MA") ~ "Massachusetts",
+    str_detect(Contributor.Address, "NY") ~ "New York",
+    str_detect(Contributor.Address, "CT") ~ "Connecticut",
+    str_detect(Contributor.Address, "WA") ~ "Washington",
+    str_detect(Contributor.Address, "OR") ~ "Oregon",
+    str_detect(Contributor.Address, "MA") ~ "Massachusetts",
+    str_detect(Contributor.Address, "HI") ~ "Hawaii",
+    str_detect(Contributor.Address, "PR") ~ "Puerto Rico",
+    str_detect(Contributor.Address, "MN") ~ "Minnesota",
+    str_detect(Contributor.Address, "NH") ~ "New Hampshire",
+    str_detect(Contributor.Address, "AK") ~ "Alaska",
+    str_detect(Contributor.Address, "OH") ~ "Ohion",
+    str_detect(Contributor.Address, "TN") ~ "Tennessee",
+    str_detect(Contributor.Address, "NV") ~ "Nevada",
+    str_detect(Contributor.Address, "RI") ~ "Rhode Island",
+    str_detect(Contributor.Address, "IN") ~ "Indiana",
+    str_detect(Contributor.Address, "KS") ~ "Kansaa",
+    str_detect(Contributor.Address, "MS") ~ "Mississippi",
+    str_detect(Contributor.Address, "IA") ~ "Iowa",
+    str_detect(Contributor.Address, "AL") ~ "Alabama",
+    str_detect(Contributor.Address, "MT") ~ "Montana",
+    str_detect(Contributor.Address, "WY") ~ "Wyoming",
+    str_detect(Contributor.Address, "UT") ~ "Utah",
+    str_detect(Contributor.Address, "NM") ~ "New Mexico",
+    str_detect(Contributor.Address, "KY") ~ "Kentucky",
+    str_detect(Contributor.Address, "SD") ~ "South Dakota",
+    str_detect(Contributor.Address, "ND") ~ "North Dakota",
+    str_detect(Contributor.Address, "OK") ~ "MOklahoma",
+    str_detect(Contributor.Address, "VT") ~ "Vermont",
+    str_detect(Contributor.Address, "ID") ~ "Idaho",
+    str_detect(Contributor.Address, "LA") ~ "Louisiana",
+    str_detect(Contributor.Address, "DE") ~ "Delaware",
+    str_detect(Contributor.Address, "VI") ~ "Virgin Islands",
+    str_detect(Contributor.Address, "NE") ~ "Nebraska",
+    str_detect(Contributor.Address, "AS") ~ "American Somoa"
+  ))
+```
+
+
