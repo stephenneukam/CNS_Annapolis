@@ -1,0 +1,86 @@
+---
+title: "general_election_analysis"
+output: html_document
+date: "2022-09-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Loading libraries
+```{r}
+library(tidyverse)
+library(janitor)
+library(dplyr)
+```
+Loading in data
+```{r}
+cox <- read.csv("data/cox_since_prim.csv")
+moore <- read.csv("data/moore_since_prim.csv")
+hogan <- read.csv("data/Hogan_ContributionsList.csv")
+```
+Cleaing data
+```{r}
+cox <- cox %>%
+  clean_names()
+moore <- moore %>%
+  clean_names()
+hogan <- hogan %>%
+  clean_names()
+
+cox <- cox %>%
+  mutate(contribution_date = as.Date(contribution_date, "%m/%d/%Y")) %>%
+  mutate(zip = str_extract(contributor_address, "\\d{5}"))
+moore <- moore %>%
+  mutate(contribution_date = as.Date(contribution_date, "%m/%d/%Y")) %>%
+  mutate(zip = str_extract(contributor_address, "\\d{5}"))
+hogan <- hogan %>%
+  mutate(contribution_date = as.Date(contribution_date, "%m/%d/%Y")) %>%
+  mutate(zip = str_extract(contributor_address, "\\d{5}"))
+```
+Taking out unique donors for all three campaigns so I can see the crossover between donors
+```{r}
+hogan_distinct <- 
+  hogan %>%
+  select(contributor_name, contributor_address) %>%
+  distinct() %>%
+  mutate(zip = str_extract(contributor_address, "\\d{5}"))
+
+moore_distinct <- moore %>%
+  select(contributor_name, contributor_address) %>%
+  distinct() %>%
+  mutate(zip = str_extract(contributor_address, "\\d{5}"))
+
+cox_distinct <- cox %>%
+  select(contributor_name, contributor_address) %>%
+  distinct() %>%
+  mutate(zip = str_extract(contributor_address, "\\d{5}"))
+```
+Joining the distinct datasets to get a crossover
+```{r}
+hogan_moore_distinct <- hogan_distinct %>%
+  inner_join(moore_distinct, by=c("contributor_name", "zip"))
+
+hogan_cox_distinct <- hogan_distinct %>%
+  inner_join(cox_distinct, by=c("contributor_name", "zip"))
+
+hogan_moore_donors <- hogan_moore_distinct %>%
+  inner_join(moore, by=c("contributor_name", "zip"))
+
+hogan_moore_donors %>%
+  summarise(total = sum(contribution_amount))
+
+##Hogan donors contributed $117,861.20 to Moore's campaign since the primary
+
+hogan_cox_donors <- hogan_cox_distinct %>%
+  inner_join(cox, by=c("contributor_name", "zip"))
+
+hogan_cox_donors %>%
+  summarise(total = sum(contribution_amount))
+
+##Hogan donors contributed $29,727 to Cox's campaign since the primary
+```
+
+
+
+
